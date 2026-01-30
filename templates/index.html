@@ -1,51 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Luxyth CPM Hit Tool V2</title>
-    <style>
-        body { background: #000; color: #00ff00; font-family: monospace; text-align: center; padding: 50px; }
-        button { background: #ff00ff; color: white; padding: 20px 40px; font-size: 20px; border: none; cursor: pointer; }
-        .stats { font-size: 30px; margin: 20px; }
-        #status { font-size: 24px; margin: 20px; }
-    </style>
+    <title>Luxyth CPM V2</title>
+    <style>body{background:#000;color:#00ff00;font-family:monospace;text-align:center;padding:50px;}
+    button{background:#ff00ff;color:white;padding:20px 40px;font-size:20px;border:none;cursor:pointer;}
+    .stats{font-size:30px;margin:20px;}#status{font-size:24px;margin:20px;}</style>
 </head>
 <body>
-    <h1>🚀 LUXYTH CPM HIT TOOL V2 - WEB</h1>
-    <h2>🚘 CPM MULTIPLAYER CHECKER</h2>
-    
-    <div id="status">🛑 Bot Durdurulmuş - BAŞLAT'a tıkla!</div>
-    
-    <button onclick="startBot()">🚀 BAŞLAT</button>
-    
-    <div class="stats">
-        <div><span id="hits">0</span> 🎉 HITS</div>
-        <div><span id="bad">0</span> ❌ BAD</div>
-        <div><span id="good">0</span> ✅ GOOD</div>
-    </div>
-
-    <script>
-    let isRunning = false;
-
-    function startBot() {
-        document.getElementById('status').innerHTML = '🟢 Bot Çalışıyor...';
-        isRunning = true;
-        pollStats();
-    }
-
-    function pollStats() {
-        if (!isRunning) return;
-        
-        fetch('/stats')
-            .then(r => r.json())
-            .then(data => {
-                document.getElementById('hits').innerHTML = data.hit_count;
-                document.getElementById('bad').innerHTML = data.bad_count;
-                document.getElementById('good').innerHTML = data.good_count;
-            })
-            .finally(() => {
-                if (isRunning) setTimeout(pollStats, 2000);
-            });
-    }
-    </script>
+<h1>🚀 LUXYTH CPM HIT TOOL V2</h1>
+<div id="status">🛑 Bot Kapalı</div>
+<button onclick="startBot()">🚀 BAŞLAT</button>
+<div class="stats">
+    <div>HITS: <span id="hits">0</span> 🎉</div>
+    <div>BAD: <span id="bad">0</span> ❌</div>
+    <div>GOOD: <span id="good">0</span> ✅</div>
+</div>
+<script>
+let running=false;
+function startBot(){
+    fetch('/start',{method:'POST'}).then(r=>r.json()).then(data=>{
+        document.getElementById('status').innerHTML='🟢 Bot Çalışıyor!';
+        running=true; pollStats();
+    });
+}
+function pollStats(){
+    if(!running) return;
+    fetch('/stats').then(r=>r.json()).then(d=>{
+        document.getElementById('hits').textContent=d.hit_count;
+        document.getElementById('bad').textContent=d.bad_count;
+        document.getElementById('good').textContent=d.good_count;
+    }).finally(()=>running && setTimeout(pollStats,2000));
+}
+</script>
 </body>
 </html>
