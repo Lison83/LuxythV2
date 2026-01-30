@@ -1,233 +1,51 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luxyth CPM Checker V2 - Web</title>
+    <title>Luxyth CPM Hit Tool V2</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Orbitron', monospace;
-            background: linear-gradient(45deg, #0a0a0a, #1a1a2e, #16213e);
-            color: #00ff00;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-        @keyframes glow {
-            from { text-shadow: 0 0 20px #00ff00; }
-            to { text-shadow: 0 0 30px #00ff00, 0 0 40px #00ff00; }
-        }
-        .ascii-art {
-            font-size: 12px;
-            font-family: monospace;
-            color: #00ff41;
-            margin-bottom: 20px;
-            white-space: pre;
-            animation: flicker 1.5s infinite alternate;
-        }
-        @keyframes flicker {
-            0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
-            20%, 24%, 55% { opacity: 0.4; }
-        }
-        .controls {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-        button {
-            padding: 15px 30px;
-            font-size: 16px;
-            font-weight: bold;
-            border: 2px solid #00ff00;
-            background: transparent;
-            color: #00ff00;
-            cursor: pointer;
-            border-radius: 10px;
-            font-family: 'Orbitron', monospace;
-            transition: all 0.3s;
-            min-width: 150px;
-        }
-        button:hover {
-            background: #00ff00;
-            color: #000;
-            box-shadow: 0 0 20px #00ff00;
-        }
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background: rgba(0, 255, 0, 0.1);
-            border: 1px solid #00ff00;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        .stat-number {
-            font-size: 2.5em;
-            font-weight: 900;
-            display: block;
-            margin-bottom: 10px;
-        }
-        .status {
-            text-align: center;
-            font-size: 1.2em;
-            margin-bottom: 20px;
-            padding: 15px;
-            border-radius: 10px;
-        }
-        .status.running { background: rgba(0, 255, 0, 0.2); }
-        .status.stopped { background: rgba(255, 0, 0, 0.2); }
-        .hits-file {
-            background: rgba(0, 150, 255, 0.2);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            word-break: break-all;
-        }
-        .live-hits {
-            max-height: 400px;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid #00ff00;
-            border-radius: 10px;
-            padding: 20px;
-            font-family: monospace;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .hit-item {
-            color: #00ff41;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: rgba(0, 255, 0, 0.1);
-            border-radius: 5px;
-        }
+        body { background: #000; color: #00ff00; font-family: monospace; text-align: center; padding: 50px; }
+        button { background: #ff00ff; color: white; padding: 20px 40px; font-size: 20px; border: none; cursor: pointer; }
+        .stats { font-size: 30px; margin: 20px; }
+        #status { font-size: 24px; margin: 20px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="ascii-art">
-🚀 LUXYTH?𝐈𝐍𝐆 𝐇𝐈𝐓 𝐓𝐎𝐎𝐋 𝐕2 - WEB
----
-| |   | |  | \ \ / /\ \   / /__   | |  | |
-| |   | |  | |\ V /  \ _/ /   | |  | || |
-| |   | |  | | > <    \   /    | |  |  __  |
-| || || |/ . \    | |     | |  | |  | |
-|_/// _\   ||     ||  ||  |_| 💾 WEB VERSION
-            </div>
-            <h1 style="font-size: 2em;">🚘 CPM MULTIPLAYER CHECKER</h1>
-        </div>
-
-        <div class="controls">
-            <button id="startBtn">▶️ BAŞLAT (20 Thread)</button>
-            <button id="stopBtn" disabled>⏹️ DURDUR</button>
-            <button id="downloadBtn" disabled>📥 HITS İNDİR</button>
-        </div>
-
-        <div class="status stopped" id="statusDiv">
-            🛑 Bot Durdurulmuş - Başlatmak için BAŞLAT butonuna tıklayın!
-        </div>
-
-        <div class="stats" id="statsDiv">
-            <div class="stat-card">
-                <span class="stat-number" id="hitCount">0</span>
-                <strong>🎉 HITS</strong>
-            </div>
-            <div class="stat-card">
-                <span class="stat-number" id="badCount">0</span>
-                <strong>❌ BAD</strong>
-            </div>
-            <div class="stat-card">
-                <span class="stat-number" id="goodCount">0</span>
-                <strong>✅ GOOD</strong>
-            </div>
-        </div>
-
-        <div class="hits-file" id="hitsFileDiv" style="display: none;">
-            <strong>📁 HITS Dosyası:</strong><br>
-            <span id="hitsFileName"></span>
-        </div>
-
-        <div class="live-hits" id="liveHits">
-            <em>Bot başlatıldığında canlı HIT'ler burada görünecek...</em>
-        </div>
+    <h1>🚀 LUXYTH CPM HIT TOOL V2 - WEB</h1>
+    <h2>🚘 CPM MULTIPLAYER CHECKER</h2>
+    
+    <div id="status">🛑 Bot Durdurulmuş - BAŞLAT'a tıkla!</div>
+    
+    <button onclick="startBot()">🚀 BAŞLAT</button>
+    
+    <div class="stats">
+        <div><span id="hits">0</span> 🎉 HITS</div>
+        <div><span id="bad">0</span> ❌ BAD</div>
+        <div><span id="good">0</span> ✅ GOOD</div>
     </div>
 
     <script>
-        let isRunning = false;
-        let hitsFile = '';
-        let statsInterval;
+    let isRunning = false;
 
-        document.getElementById('startBtn').onclick = async () => {
-            const res = await fetch('/start', {method: 'POST'});
-            const data = await res.json();
-            
-            if (data.status === 'started') {
-                isRunning = true;
-                hitsFile = data.hits_file;
-                document.getElementById('startBtn').disabled = true;
-                document.getElementById('stopBtn').disabled = false;
-                document.getElementById('downloadBtn').disabled = false;
-                document.getElementById('statusDiv').className = 'status running';
-                document.getElementById('statusDiv').textContent = '🚀 Bot Çalışıyor! (20 Thread)';
-                document.getElementById('hitsFileName').textContent = hitsFile;
-                document.getElementById('hitsFileDiv').style.display = 'block';
-                
-                updateStats();
-                statsInterval = setInterval(updateStats, 1000);
-            }
-        };
+    function startBot() {
+        document.getElementById('status').innerHTML = '🟢 Bot Çalışıyor...';
+        isRunning = true;
+        pollStats();
+    }
 
-        document.getElementById('stopBtn').onclick = async () => {
-            await fetch('/stop', {method: 'POST'});
-            isRunning = false;
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('stopBtn').disabled = true;
-            document.getElementById('statusDiv').className = 'status stopped';
-            document.getElementById('statusDiv').textContent = '🛑 Bot Durdurulmuş';
-            if (statsInterval) clearInterval(statsInterval);
-        };
-
-        document.getElementById('downloadBtn').onclick = () => {
-            window.open(`/download/${hitsFile}`, '_blank');
-        };
-
-        async function updateStats() {
-            if (!isRunning) return;
-            const res = await fetch('/stats');
-            const stats = await res.json();
-            
-            document.getElementById('hitCount').textContent = stats.hit_count;
-            document.getElementById('badCount').textContent = stats.bad_count;
-            document.getElementById('goodCount').textContent = stats.good_count;
-        }
+    function pollStats() {
+        if (!isRunning) return;
+        
+        fetch('/stats')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('hits').innerHTML = data.hit_count;
+                document.getElementById('bad').innerHTML = data.bad_count;
+                document.getElementById('good').innerHTML = data.good_count;
+            })
+            .finally(() => {
+                if (isRunning) setTimeout(pollStats, 2000);
+            });
+    }
     </script>
 </body>
-          </html>
+</html>
